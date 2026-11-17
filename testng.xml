@@ -1,0 +1,28 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Full regression run: every test in every class. Default suite for mvn test. -->
+<suite name="Restful Booker - Regression">
+
+    <listeners>
+        <listener class-name="com.listeners.TestListener"/>
+        <listener class-name="com.listeners.RetryTransformer"/>
+    </listeners>
+
+    <test name="Health">
+        <classes>
+            <class name="tests.HealthCheckTest"/>
+        </classes>
+    </test>
+
+    <test name="Auth">
+        <classes>
+            <class name="tests.AuthTest"/>
+        </classes>
+    </test>
+
+    <test name="Booking">
+        <classes>
+            <class name="tests.BookingTest"/>
+        </classes>
+    </test>
+
+</suite>

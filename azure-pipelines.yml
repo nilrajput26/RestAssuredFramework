@@ -1,0 +1,60 @@
+# Azure DevOps pipeline for the Restful-Booker API tests.
+# Needs: a secret pipeline variable (or variable group / Key Vault) named BOOKER_PASSWORD.
+
+trigger:
+  branches:
+    include:
+      - main
+
+schedules:
+  - cron: "0 2 * * *"            # nightly regression (UTC)
+    displayName: Nightly regression
+    branches:
+      include:
+        - main
+    always: true
+
+parameters:
+  - name: env
+    displayName: Environment
+    type: string
+    default: qa
+    values: [qa, dev]
+  - name: suite
+    displayName: TestNG suite
+    type: string
+    default: testng.xml
+    values: [testng.xml, testng-smoke.xml]
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: "21"
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
+
+  - script: mvn -B clean test -Denv=${{ parameters.env }} -DsuiteXmlFile=${{ parameters.suite }}
+    displayName: Run API tests
+    env:
+      BOOKER_PASSWORD: $(BOOKER_PASSWORD)   # secret variables must be mapped explicitly
+
+  - task: PublishTestResults@2
+    displayName: Publish TestNG results
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: target/surefire-reports/*.xml
+
+  - script: mvn -B allure:report
+    displayName: Generate Allure report
+    condition: always()
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Allure report
+    condition: always()
+    inputs:
+      targetPath: target/site/allure-maven-plugin
+      artifact: allure-report
