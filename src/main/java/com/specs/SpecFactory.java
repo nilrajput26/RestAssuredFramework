@@ -34,7 +34,7 @@ public class SpecFactory {
 
     public static ResponseSpecification getResponseSpec(){
               return new ResponseSpecBuilder()
-                      .expectResponseTime(lessThan(5000L))
+                      .expectResponseTime(lessThan(4000L))
                       .build();
 
     }
